@@ -65,6 +65,7 @@ for (const [envVar, noteKey] of [["OPERATOR_NOTE", "from_my_human"], ["TOOLS_NOT
   }
 }
 
+const BOOT_TS = Date.now();   // mission clock origin for the stream HUD
 const PORT = Number(process.env.PORT || 8947);
 const ENABLED = process.env.ENABLED !== "false";           // master run switch (agent acts)
 const TICK_MS = Number(process.env.TICK_MINUTES || 3) * 60 * 1000;
@@ -105,6 +106,7 @@ app.get("/api/state", async (_req, res) => {
   let sol = 0; try { sol = await walletLib.solBalance(); } catch {}
   res.json({
     tick: state.tick,
+    startedAt: BOOT_TS,
     events: state.events.slice(-120),
     coin: state.coin,
     goals: state.goals,

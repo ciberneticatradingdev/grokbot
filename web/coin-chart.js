@@ -51,6 +51,8 @@ export function mountCoinChart(canvas, opts = {}) {
   const ctx = canvas.getContext("2d");
   const getCoin = opts.getCoin || (async () => null);
   const THEME = THEMES[opts.theme] || THEMES.light;
+  // the HUD paints its own big telemetry numbers from the same price poll
+  const onPrice = opts.onPrice || (() => {});
   // the OHLCV proxy lives on the backend; the landing may be on another origin
   const apiBase = opts.api || "";
 
@@ -126,6 +128,7 @@ export function mountCoinChart(canvas, opts = {}) {
       if (!pairAddr) { pairAddr = p.pairAddress; pollOhlcv(); }
       pairAddr = p.pairAddress;
       sample(px.usd);
+      onPrice(px);
     } catch {}
   }
   async function pollOhlcv() {

@@ -206,7 +206,7 @@ export function createGrokbot() {
 }
 
 // Full ready-to-render scene (lights + shadow ground + framing).
-export function mountScene(canvas, { transparent = false } = {}) {
+export function mountScene(canvas, { transparent = false, space = false } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: transparent });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
@@ -232,8 +232,17 @@ export function mountScene(canvas, { transparent = false } = {}) {
   scene.add(key);
   const fill = new THREE.DirectionalLight(0xc9dcff, 0.5); fill.position.set(-7, 3, 5); scene.add(fill);
   const rim = new THREE.DirectionalLight(0xa8d8ff, 0.85); rim.position.set(-2, 4, -8); scene.add(rim);
+  if (space) {
+    // on black, a black shell disappears: two hard rims carve the silhouette and
+    // a cool bounce from below reads as light off the planet
+    key.intensity = 0.95;
+    rim.intensity = 2.6; rim.color.setHex(0xbfe4ff); rim.position.set(-4, 5, -7);
+    const rim2 = new THREE.DirectionalLight(0xffffff, 1.8); rim2.position.set(5, 4, -6); scene.add(rim2);
+    const bounce = new THREE.DirectionalLight(0x7fb6ff, 0.55); bounce.position.set(0, -6, 3); scene.add(bounce);
+  }
 
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.ShadowMaterial({ opacity: 0.22 }));
+  // no cast shadow in space — there is no floor up there
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.ShadowMaterial({ opacity: space ? 0 : 0.22 }));
   ground.rotation.x = -Math.PI / 2;
   ground.position.y = -1.63;
   ground.receiveShadow = true;
